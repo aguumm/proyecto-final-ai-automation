@@ -1,0 +1,946 @@
+{
+  "name": "\"Del Trebol consultas\"",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {
+          "messageStatusUpdates": []
+        }
+      },
+      "id": "dc750be6-7e5d-45f7-9f3c-126bd592e505",
+      "name": "Mensaje de WhatsApp",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        144
+      ],
+      "webhookId": "b9ac8b0a-53f1-42ba-84e4-0f15c3abb3e9",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "1FDZDMsHvirQgBHd",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1352ac29-a031-447b-8246-d4f931a55110",
+              "name": "mensaje_limpio",
+              "value": "={{ $json.messages?.[0]?.text?.body || $json.body?.mensaje || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "817c370a-1c09-4fcd-b13a-70840230fcfe",
+              "name": "largo_mensaje",
+              "value": "={{ ($json.messages?.[0]?.text?.body || $json.body?.mensaje || '').length }}",
+              "type": "number"
+            },
+            {
+              "id": "e8f1d4d0-14b8-4c2a-bb57-509be37a6ea7",
+              "name": "telefono_limpio",
+              "value": "={{ $json.contacts[0].wa_id }}",
+              "type": "string"
+            },
+            {
+              "id": "1b28bd37-f50c-4db5-93e8-df39b88db76d",
+              "name": "canal",
+              "value": "=whatsapp",
+              "type": "string"
+            },
+            {
+              "id": "85b8bbb0-d84a-486b-aeab-61c5225450c6",
+              "name": "recibido_en",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "752c3068-a2f7-4f7f-b88a-c36dd32babac",
+              "name": "nombre",
+              "value": "={{ $json.contacts[0].profile.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "9e344acf-9b02-48f9-9b06-e8570dff8bc2",
+      "name": "Datos de la consulta",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "44dd1030-03b8-4b7c-98ad-624127f80fdb",
+              "leftValue": "={{ $json.mensaje_limpio.length }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3d7813b8-c323-41bd-acad-104095e138e2",
+      "name": "¿Mensaje válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        496,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "752622ba-bdbf-4ee4-a074-0867c46b5fa9",
+              "name": "es_valido",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "ff45617b-dec8-4c8a-bb0b-6ef7ab7ebc40",
+              "name": "motivo",
+              "value": "mensaje_vacio_o_corto",
+              "type": "string"
+            },
+            {
+              "id": "b9cff694-9ca4-43a3-8f1f-c142de5c56eb",
+              "name": "respuesta_fallback",
+              "value": "No recibimos tu consulta. Escribínos de nuevo con tu pregunta.",
+              "type": "string"
+            },
+            {
+              "id": "1d248541-e503-42bb-b9c3-2161285de364",
+              "name": "telefono_limpio",
+              "value": "={{ $json.telefono_limpio }}",
+              "type": "string"
+            },
+            {
+              "id": "256a6f15-3a2f-42d0-ac5c-942879103eab",
+              "name": "recibido_en",
+              "value": "={{ $json.recibido_en }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "584cad53-ba3a-4053-80c9-6b94ae046010",
+      "name": "Error - Invalido",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        832,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1BC7-b6ao2PBb3R5RfytaOW_83SVvwbJqm5qvFNKp4ao",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Registro",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha y hora": "={{ $now.setZone('America/Argentina/Buenos_Aires').toFormat('dd/MM/yyyy HH:mm') }}",
+            "Nombre y Apellido": "={{ $('Datos de la consulta').item.json.nombre || 'Sin nombre' }}",
+            "Telefono": "={{ $('Datos de la consulta').item.json.telefono_limpio }}",
+            "Canal": "={{ $('Datos de la consulta').item.json.canal }}",
+            "Pregunta": "={{ $('Datos de la consulta').item.json.mensaje_limpio }}",
+            "Respuesta": "={{ $json.respuesta_fallback }}",
+            "Derivado": "Sí"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Fecha y hora",
+              "displayName": "Fecha y hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nombre y Apellido",
+              "displayName": "Nombre y Apellido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Telefono",
+              "displayName": "Telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Canal",
+              "displayName": "Canal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Pregunta",
+              "displayName": "Pregunta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Respuesta",
+              "displayName": "Respuesta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Derivado",
+              "displayName": "Derivado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "84ca6aa9-a6f8-42bb-bfd5-c0294037dd17",
+      "name": "Anotar derivación",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1904,
+        -112
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T35rdkTZbrSYYwWw",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1353606207839695",
+        "recipientPhoneNumber": "={{ ($('Datos de la consulta').item.json.telefono_limpio || '').replace('549', '54') }}",
+        "textBody": "={{ $('Error - Invalido').isExecuted ? $('Error - Invalido').item.json.respuesta_fallback : $('Respuesta al cliente').item.json.output }}",
+        "additionalFields": {}
+      },
+      "id": "c7475b10-e865-4c94-842c-11917784555e",
+      "name": "Enviar por Whastapp",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        3024,
+        144
+      ],
+      "webhookId": "a7984c73-80fe-4d07-93f5-b295c32f8cf5",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "4CCVtn7gmEOI0Bhk",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2622a774-c3dc-43a8-a212-64798f86d0d4",
+              "name": "es_valido",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "4b65a420-bec8-4928-b2fa-8488081d506b",
+              "name": "mensaje_limpio",
+              "value": "={{ $json.mensaje_limpio }}",
+              "type": "string"
+            },
+            {
+              "id": "a93a99f1-2f81-4608-b6d1-4dbf934b9c7e",
+              "name": "telefono_limpio",
+              "value": "={{ $json.telefono_limpio }}",
+              "type": "string"
+            },
+            {
+              "id": "836f2b64-142f-489e-86ab-f55649e80560",
+              "name": "canal",
+              "value": "={{ $json.canal }}",
+              "type": "string"
+            },
+            {
+              "id": "14adfe2c-34a5-4732-9114-c7055ecb4ea5",
+              "name": "recibido_en",
+              "value": "={{ $json.recibido_en }}",
+              "type": "string"
+            },
+            {
+              "id": "25080b89-796b-4ef6-8007-6c4eb0e752dd",
+              "name": "listo_para_ia",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "3da3071e-078e-4c20-9991-9d726522566b",
+              "name": "nombre",
+              "value": "={{ $('Datos de la consulta').item.json.nombre }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1dd011a3-42c3-4d15-bbbe-5ba11cea020d",
+      "name": "OK - listo para IA",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        832,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1BC7-b6ao2PBb3R5RfytaOW_83SVvwbJqm5qvFNKp4ao",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Base",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "650ae3d5-d5c0-4860-86b5-f881488d6edd",
+      "name": "Base de respuestas",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1904,
+        304
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T35rdkTZbrSYYwWw",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "base",
+        "options": {}
+      },
+      "id": "f481c0f2-9768-4e0a-9f5d-a8d4a272c9d6",
+      "name": "Armar contexto",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2096,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Nombre: {{ $('OK - listo para IA').item.json.nombre }}\nConsulta: {{ $('OK - listo para IA').item.json.mensaje_limpio }}\nMinutos: {{ $json.minutos || $('Minutos aeropuerto').isExecuted && $('Minutos aeropuerto').first().json.minutos || $('Minutos centro').isExecuted && $('Minutos centro').first().json.minutos || '' }}\n\nRespondé con el formato de saludo y cierre indicado en el System Message.",
+        "options": {
+          "systemMessage": "=Sos el asistente del complejo de cabañas Del Trébol, en Bariloche. Respondés preguntas frecuentes de clientes antes de reservar. Hablás en español rioplatense, tono amable y directo, como quien atiende en recepción.\nTu única fuente es la lista de abajo. No inventes nada. Si la consulta no está en la lista, o no estás seguro, respondé exactamente: \"No tengo ese dato. Te derivo con un administrativo.\"\nDatos del complejo:\n- Ropa blanca: Sí, el complejo cuenta con ropa blanca: sábanas y toallones.\n- Cochera: Las cabañas tradicionales tienen cocheras compartidas. Las premium, individuales.\n- Parrilla: Las premium tienen parrilla individual. Tradicionales y monoambiente: 4 parrillas compartidas en un sector del predio.\n- Wifi: Sí, gratuito en todo el complejo.\n- Capacidad: Tradicionales hasta 5 personas, premium hasta 6, monoambiente hasta 3.\n- Mascotas: Sí, aceptamos mascotas.\n- Check-in: A partir de las 14:00 hs.\n- Check-out: Hasta las 10:00 hs.\n- Pileta: No contamos con pileta.\n\n## Formato para WhatsApp\n- Máximo 3 líneas cortas. No hagas párrafos largos.\n- Para resaltar algo usá un asterisco de cada lado: *así*. Nunca uses ** ni #.\n- Si hay una lista, un guion al principio de cada línea.\n- Como máximo un emoji por mensaje, y solo en el saludo inicial (justo después del nombre).\n\n## Datos del cliente\nNombre: {{ $('OK - listo para IA').item.json.nombre }}\nConsulta: {{ $('OK - listo para IA').item.json.mensaje_limpio }}\n\nSiempre:\n- Respondé en una o dos oraciones.\n- Respetá el singular y el plural de la base. No lo cambies.\n- Usá solo los datos de la lista.\n- Si falta un dato o la pregunta está fuera de alcance, usá la frase de derivación.\n- Si la consulta es sobre distancia al centro o al aeropuerto y llega el campo Minutos con un número, respondé exactamente con ese número usando este formato:\nHola {{ $('OK - listo para IA').item.json.nombre }} 👋\nEstás a X minutos del [centro/aeropuerto].\nCualquier otra consulta, estoy a tu disposición.\n- Si Minutos está vacío o no llega, usá la frase de derivación.\n\nNunca:\n- No inventes precios, disponibilidad, fechas ni servicios que no estén en la lista.\n- No saludes de más ni agregues datos de más.\n- No confirmes una reserva ni pidas datos de pago.\n\n## Saludo y cierre:\n- Solo en el primer mensaje de la conversación, empezá con «Hola» seguido del nombre y un emoji (ejemplo: Hola Juan 👋).\n- Si la conversación ya empezó, no saludes ni pongas emoji.\n- Terminá con «Cualquier otra consulta, estoy a tu disposición.»\n\nFormato de salida: solo el texto de la respuesta, sin comillas, sin título, sin lista."
+        }
+      },
+      "id": "13501f58-f3d7-4b19-8fdd-7c1830dc26c3",
+      "name": "Respuesta al cliente",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2352,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "id": "6275499c-9932-49ed-9ad1-5ed46d02acb5",
+      "name": "Gemini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        2352,
+        560
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "OwHY0ykR31E8q6DB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Datos de la consulta').item.json.telefono_limpio || 'default' }}"
+      },
+      "id": "6afee254-c9fb-4cce-8497-44087bd38968",
+      "name": "Memoria",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        2448,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1BC7-b6ao2PBb3R5RfytaOW_83SVvwbJqm5qvFNKp4ao",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Registro",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Nombre y Apellido": "={{ $('OK - listo para IA').item.json.nombre }}",
+            "Telefono": "={{ $('OK - listo para IA').item.json.telefono_limpio }}",
+            "Canal": "={{ $('OK - listo para IA').item.json.canal }}",
+            "Pregunta": "={{ $('OK - listo para IA').item.json.mensaje_limpio }}",
+            "Respuesta": "={{ $json.output }}",
+            "Derivado": "No",
+            "Fecha y hora": "={{ $now.setZone('America/Argentina/Buenos_Aires').toFormat('dd/MM/yyyy HH:mm') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Fecha y hora",
+              "displayName": "Fecha y hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nombre y Apellido",
+              "displayName": "Nombre y Apellido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Telefono",
+              "displayName": "Telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Canal",
+              "displayName": "Canal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Pregunta",
+              "displayName": "Pregunta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Respuesta",
+              "displayName": "Respuesta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Derivado",
+              "displayName": "Derivado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "42cc2e83-7f53-4617-b7cd-92ae61be8972",
+      "name": "Anotar consulta",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2736,
+        304
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T35rdkTZbrSYYwWw",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://graphhopper.com/api/1/route?point=-41.073170,-71.489872&point=-41.133419,-71.310197&vehicle=car&locale=es&key=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1200,
+        704
+      ],
+      "id": "c6840d01-ac40-429c-8de3-fdadb9d9a145",
+      "name": "Distancia centro"
+    },
+    {
+      "parameters": {
+        "url": "https://graphhopper.com/api/1/route?point=-41.073170,-71.489872&point=-41.145860,-71.161567&vehicle=car&locale=es&key=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1200,
+        464
+      ],
+      "id": "126058b8-4eec-44d1-86b5-894d5bf07864",
+      "name": "Distancia Aeropuerto"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1712,
+        304
+      ],
+      "id": "0d66e570-9616-4219-88d4-a6aea9a7ee13",
+      "name": "Unir datos"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8d9d118c-be49-4e2a-8a3c-f8b5956eb519",
+              "name": "minutos",
+              "value": "={{ Math.round($json.paths[0].time / 60000) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1472,
+        464
+      ],
+      "id": "dfa66262-d723-49c4-8b30-90e665f01cdf",
+      "name": "Minutos aeropuerto"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d7178c01-b5f0-4cf8-b33e-8730fdd022da",
+              "name": "minutos",
+              "value": "={{ Math.round($json.paths[0].time / 60000) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1472,
+        704
+      ],
+      "id": "309b7c9e-9340-4acb-82d2-44dae60a1df7",
+      "name": "Minutos centro"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.mensaje_limpio.toLowerCase() }}",
+                    "rightValue": "aeropuerto",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "c4688d4b-cdf2-4d6a-ae74-ed41ed3dd2ea"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.5,
+      "position": [
+        960,
+        592
+      ],
+      "id": "0bbb09f0-5185-416b-bb7e-f902569cb08e",
+      "name": "Tipo de consulta"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Mensaje de WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Datos de la consulta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Datos de la consulta": {
+      "main": [
+        [
+          {
+            "node": "¿Mensaje válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Mensaje válido?": {
+      "main": [
+        [
+          {
+            "node": "Error - Invalido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OK - listo para IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error - Invalido": {
+      "main": [
+        [
+          {
+            "node": "Anotar derivación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anotar derivación": {
+      "main": [
+        [
+          {
+            "node": "Enviar por Whastapp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OK - listo para IA": {
+      "main": [
+        [
+          {
+            "node": "Unir datos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Tipo de consulta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Base de respuestas": {
+      "main": [
+        [
+          {
+            "node": "Armar contexto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar contexto": {
+      "main": [
+        [
+          {
+            "node": "Respuesta al cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respuesta al cliente": {
+      "main": [
+        [
+          {
+            "node": "Anotar consulta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Respuesta al cliente",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memoria": {
+      "ai_memory": [
+        [
+          {
+            "node": "Respuesta al cliente",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anotar consulta": {
+      "main": [
+        [
+          {
+            "node": "Enviar por Whastapp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Distancia centro": {
+      "main": [
+        [
+          {
+            "node": "Minutos centro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Distancia Aeropuerto": {
+      "main": [
+        [
+          {
+            "node": "Minutos aeropuerto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unir datos": {
+      "main": [
+        [
+          {
+            "node": "Base de respuestas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Minutos aeropuerto": {
+      "main": [
+        [
+          {
+            "node": "Unir datos",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Minutos centro": {
+      "main": [
+        [
+          {
+            "node": "Unir datos",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Tipo de consulta": {
+      "main": [
+        [
+          {
+            "node": "Distancia Aeropuerto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Distancia centro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar por Whastapp": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "tJ3x3DzAtbxNRhI0",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "720cc27c-f5e1-4cca-a7e9-bb6b1bcf9bb4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d978eabdc5108b65c42da7481d5857fe4c1731d496bf0f9f2933130fc0b80186"
+  },
+  "nodeGroups": [],
+  "id": "ShOqC8dPFj93bh8H",
+  "tags": []
+}

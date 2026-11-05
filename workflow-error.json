@@ -1,0 +1,100 @@
+{
+  "name": "Manejo de errores Del Trebol",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "15191fbf-827f-4e62-b146-0feec5e410e7",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "252d5a51-9cdd-4c26-928d-c2c16f244a52",
+              "name": "mensaje",
+              "value": "No tengo ese dato. Te derivo con un administrativo.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "0827890e-a99e-486e-97ef-4a279bb16468",
+      "name": "Mensaje de error"
+    },
+    {
+      "parameters": {
+        "sendTo": "martinezagustin039@gmail.com",
+        "subject": "Error en Del Trebol",
+        "message": "Se produjo un error en el workflow del trebol. Revisar la ejecución en n8n.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "795828cc-f6ea-4ae3-adfd-657f88c0748c",
+      "name": "Enviar por mail",
+      "webhookId": "3f864d10-ff98-4993-bcb5-2e7a0646968e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VqMQYmAuryMEkFHg",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Mensaje de error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensaje de error": {
+      "main": [
+        [
+          {
+            "node": "Enviar por mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "890ce3a4-09b8-456a-8cf4-87f06ed6de86",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d978eabdc5108b65c42da7481d5857fe4c1731d496bf0f9f2933130fc0b80186"
+  },
+  "nodeGroups": [],
+  "id": "tJ3x3DzAtbxNRhI0",
+  "tags": []
+}
