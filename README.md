@@ -121,11 +121,11 @@ Detalle del nodo Code configurado con `throw new Error("Error de prueba para el 
 
 ### Mail de notificación de error
 ![Mail de error](capturas/04-mail-error.png)
-Correo recibido automáticamente cuando se activa el Error Workflow.Confirma que la alerta llega al administrador.
+Correo recibido automáticamente cuando se activa el Error Workflow. Confirma que la alerta llega al administrador.
 
 ### Ejecución del Error Workflow
 ![Error Workflow](capturas/05-error-workflow.png)
-Workflow de error ejecutado correctamente: Error Trigger → mensaje → envío por mail.Todos los nodos en verde.
+Workflow de error ejecutado correctamente: Error Trigger → mensaje → envío por mail. Todos los nodos en verde.
 
 ### Ejecución exitosa del flujo completo
 ![Ejecución exitosa](capturas/06-ejecucion-exitosa.png)
@@ -141,6 +141,7 @@ Configuración del nodo “Enviar por WhatsApp” con las expresiones que arman 
 
 ### Output de la respuesta de la IA
 ![Output IA](capturas/09-output-ia.png)
+
 Respuesta generada por el agente de Gemini, lista para enviar: saludo personalizado + información + cierre.
 
 ### Registro en Google Sheets
