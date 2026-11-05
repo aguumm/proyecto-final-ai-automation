@@ -57,7 +57,7 @@ El flujo contempla tres puntos de falla concretos y los resuelve de forma difere
 
 2. **Consulta fuera de la base.** El system prompt obliga al agente a responder exactamente «No tengo ese dato. Te derivo con un administrativo.» cuando la pregunta no está en la lista o cuando no tiene certeza. De esta forma se controla el riesgo de alucinación y se evita que el cliente reciba información inventada.
 
-3. **Fallo técnico no controlado.** Ante errores inesperados (API caída, credencial inválida, timeout, etc.), el flujo activa el Error Workflow (llamado “manejo de errores Del Trebol” / workflow-error) que envía una notificación por mail con el detalle del error y el identificador de la ejecución. Esto permite detectar y revisar incidentes sin que queden sin registro, y mantiene la operación trazable.
+3. **Fallo técnico no controlado.** Ante errores inesperados (API caída, credencial inválida, timeout, etc.), el flujo activa el Error Workflow (llamado “manejo de errores Del Trebol” / workflow-error) que envía una notificación por mail al administrador del complejo (martinezagustin039@gmail.com) con el detalle del error y el identificador de la ejecución. Esto permite detectar y revisar incidentes sin que queden sin registro, y mantiene la operación trazable.
 
 Estos tres mecanismos cubren tanto errores de entrada como fallos del sistema, y dejan evidencia en Sheets o por notificación.
 
@@ -108,59 +108,48 @@ Formato de salida: solo el texto de la respuesta, sin comillas, sin título, sin
 ## Capturas del workflow
 
 ### Canvas del workflow principal
-![Canvas del workflow principal](capturas/Captura%20de%20pantalla%202026-11-01%20180612.png)
-
+![Canvas completo](capturas/01-canvas-completo.png)
 Vista general del flujo en el editor de n8n. Se ve el recorrido completo: trigger de WhatsApp, validación del mensaje, ramas de error e IA, obtención de distancias con GraphHopper, consulta a la base de respuestas, agente de Gemini y envío final.
 
-### Ejecución con error forzado (Code)
-![Ejecución con error forzado](capturas/Captura%20de%20pantalla%202026-11-03%20190531.png)
-
-Ejecución que falló a propósito en el nodo Code. Se observa el nodo en rojo y el resto del flujo detenido, lo que activa el Error Trigger.
+### Ejecución con error forzado
+![Error forzado](capturas/02-error-forzado-canvas.png)
+Ejecución que falló a propósito en el nodo Code para activar el Error Workflow.
 
 ### Nodo Code con el error de prueba
-![Nodo Code con error de prueba](capturas/Captura%20de%20pantalla%202026-11-03%20190618.png)
-
-Detalle del nodo Code configurado con `throw new Error("Error de prueba para el Error Trigger")` y el output que confirma el fallo.
+![Nodo Code](capturas/03-nodo-code-error.png)
+Detalle del nodo Code configurado con `throw new Error("Error de prueba para el Error Trigger")`y el output que confirma el fallo.
 
 ### Mail de notificación de error
-![Mail de notificación de error](capturas/Captura%20de%20pantalla%202026-11-03%20190715.png)
+![Mail de error](capturas/04-mail-error.png)
+Correo recibido automáticamente cuando se activa el Error Workflow.Confirma que la alerta llega al administrador.
 
-Correo recibido automáticamente cuando se activa el Error Workflow. Confirma que la alerta llega al administrador.
-
-### Ejecución del Error Trigger
-![Ejecución del Error Trigger](capturas/Captura%20de%20pantalla%202026-11-03%20190742.png)
-
-Workflow de error ejecutado correctamente: Error Trigger → mensaje de error → envío por mail. Todos los nodos en verde.
+### Ejecución del Error Workflow
+![Error Workflow](capturas/05-error-workflow.png)
+Workflow de error ejecutado correctamente: Error Trigger → mensaje → envío por mail.Todos los nodos en verde.
 
 ### Ejecución exitosa del flujo completo
-![Ejecución exitosa](capturas/Captura%20de%20pantalla%202026-11-03%20191305.png)
-
+![Ejecución exitosa](capturas/06-ejecucion-exitosa.png)
 Ejecución correcta del workflow principal. Se ve la rama de la IA en verde, con todos los nodos procesados (datos, distancias, base, agente y envío).
 
-### Registro en Google Sheets
-![Registro en Google Sheets](capturas/Captura%20de%20pantalla%202026-11-03%20191612.png)
-
-Hoja de Registro con dos filas: una consulta inválida (derivada) y una válida respondida por la IA. Se observan fecha, nombre, teléfono, canal, pregunta, respuesta y columna Derivado.
-
 ### Output del trigger de WhatsApp
-![Output del trigger de WhatsApp](capturas/Captura%20de%20pantalla%202026-11-03%20191421.png)
-
-JSON recibido por el nodo “Mensaje de WhatsApp” con el mensaje real del cliente (“Hola, tienen ropa blanca?”).
+![Output WhatsApp](capturas/07-output-whatsapp-trigger.png)
+JSON recibido por el nodo “Mensaje de WhatsApp” con el mensaje del cliente.
 
 ### Nodo de envío por WhatsApp
-![Nodo de envío por WhatsApp](capturas/Captura%20de%20pantalla%202026-11-03%20191501.png)
-
-Configuración del nodo “Enviar por Whatsapp” con las expresiones que arman el número y el cuerpo del mensaje a partir de los datos del flujo.
+![Nodo envío](capturas/08-nodo-envio-whatsapp.png)
+Configuración del nodo “Enviar por WhatsApp” con las expresiones que arman el número y el cuerpo del mensaje a partir de los datos del flujo.
 
 ### Output de la respuesta de la IA
-![Output de la respuesta de la IA](capturas/Captura%20de%20pantalla%202026-11-03%20191546.png)
+![Output IA](capturas/09-output-ia.png)
+Respuesta generada por el agente de Gemini, lista para enviar: saludo personalizado + información + cierre.
 
-Respuesta generada por el agente de Gemini, lista para enviar: saludo personalizado + información de ropa blanca + cierre.
+### Registro en Google Sheets
+![Registro Sheets](capturas/10-registro-sheets.png)
+Hoja de Registro con una consulta inválida (derivada) y una válida respondida por la IA. Se observan fecha, nombre, teléfono, canal, pregunta, respuesta y columna Derivado.
 
 ### Conversación real en WhatsApp
-![Conversación en WhatsApp](capturas/Captura%20de%20pantalla%202026-11-03%20191918.png)
-
-Captura de la conversación en WhatsApp donde se ve el mensaje del cliente y la respuesta automática del flujo.
+![Conversación WhatsApp](capturas/11-conversacion-whatsapp.png)
+Captura de la conversación en WhatsApp con el mensaje del cliente y la respuesta automática.
 
 ---
 
