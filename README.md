@@ -57,7 +57,7 @@ El flujo contempla tres puntos de falla concretos y los resuelve de forma difere
 
 2. **Consulta fuera de la base.** El system prompt obliga al agente a responder exactamente «No tengo ese dato. Te derivo con un administrativo.» cuando la pregunta no está en la lista o cuando no tiene certeza. De esta forma se controla el riesgo de alucinación y se evita que el cliente reciba información inventada.
 
-3. **Fallo técnico no controlado.** Ante errores inesperados (API caída, credencial inválida, timeout, etc.), el flujo activa una notificación por mail que incluye el detalle del error y el identificador de la ejecución. Esto permite detectar y revisar incidentes sin que queden sin registro, y mantiene la operación trazable.
+3. **Fallo técnico no controlado.** Ante errores inesperados (API caída, credencial inválida, timeout, etc.), el flujo activa el Error Workflow (llamado “manejo de errores Del Trebol” / workflow-error) que envía una notificación por mail con el detalle del error y el identificador de la ejecución. Esto permite detectar y revisar incidentes sin que queden sin registro, y mantiene la operación trazable.
 
 Estos tres mecanismos cubren tanto errores de entrada como fallos del sistema, y dejan evidencia en Sheets o por notificación.
 
