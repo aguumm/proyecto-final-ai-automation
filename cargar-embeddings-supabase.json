@@ -1,0 +1,206 @@
+{
+  "name": "Cargar embeddings Supabase",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1BC7-b6ao2PBb3R5RfytaOW_83SVvwbJqm5qvFNKp4ao",
+          "mode": "list",
+          "cachedResultName": "Del Trebol Consultas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BC7-b6ao2PBb3R5RfytaOW_83SVvwbJqm5qvFNKp4ao/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Base",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BC7-b6ao2PBb3R5RfytaOW_83SVvwbJqm5qvFNKp4ao/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "d8b8d38d-ea90-412a-8a88-83eea6162c1e",
+      "name": "Leer base",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T35rdkTZbrSYYwWw",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b122abf9-7558-4003-bdcf-cda3929ef14e",
+      "name": "Inicio"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": ""
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"models/gemini-embedding-001\",\n  \"content\": {\n    \"parts\": [\n      {\n        \"text\": \"{{ $json.Respuesta }}\"\n      }\n    ]\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        464,
+        0
+      ],
+      "id": "7b9a4477-9595-43e5-b03e-bb261b27ab4d",
+      "name": "Generar embeddings"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        608,
+        208
+      ],
+      "id": "08f7c7f6-cc07-476f-92f6-0403e1f963c2",
+      "name": "Embeddings Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "OwHY0ykR31E8q6DB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $('Leer base').item.json.Respuesta }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        784,
+        208
+      ],
+      "id": "be5fa5ff-2515-4072-8c06-ee43f9ce88d0",
+      "name": "Cargar respuestas"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documentos",
+          "mode": "list",
+          "cachedResultName": "documentos"
+        },
+        "embeddingBatchSize": 1,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.4,
+      "position": [
+        656,
+        0
+      ],
+      "id": "7d98e686-40f9-471d-9097-6f5df66433f0",
+      "name": "Guardar en Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "CaOw3xKCbyPsZ0hJ",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Inicio": {
+      "main": [
+        [
+          {
+            "node": "Leer base",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer base": {
+      "main": [
+        [
+          {
+            "node": "Generar embeddings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar embeddings": {
+      "main": [
+        [
+          {
+            "node": "Guardar en Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Guardar en Supabase",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar respuestas": {
+      "ai_document": [
+        [
+          {
+            "node": "Guardar en Supabase",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a184d916-4dfb-4c9e-a5ff-393a1238d930",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d978eabdc5108b65c42da7481d5857fe4c1731d496bf0f9f2933130fc0b80186"
+  },
+  "nodeGroups": [],
+  "id": "7NWymSg68PFzVbgW",
+  "tags": []
+}
